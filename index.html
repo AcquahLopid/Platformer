@@ -24,7 +24,7 @@
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 300},
+                gravity: { y: 600},
                 debug: false
             }
         },
@@ -36,15 +36,16 @@
     };
 
     var player;
+    var map;
 
     var game = new Phaser.Game(config);
 
     function preload ()
     {
-        this.load.image('bg', 'assets/background.jpeg');
+        this.load.image('bg', 'assets/sky.jpeg');
+        this.load.image('clouds', 'assets/clouds.png');
         this.load.image('platform', 'assets/platform.png');
-        // this.load.image('star', 'assets/star.png');
-        // this.load.image('bomb', 'assets/bomb.png');
+        this.load.image('air platform', 'assets/airplatform.png');
         this.load.atlas('player', 'assets/spritesheet.png', 'assets/sprites.json',
             { frameWidth: 100, frameHeight: 100 });
 
@@ -53,12 +54,18 @@
     function create ()
     {   
         this.add.image(728 / 2, 455 / 2, 'bg');
+        cloudsWhite = this.add.tileSprite(640, 200, 1280, 400, 'clouds');
 
         platforms = this.physics.add.staticGroup();
 
-        platforms.create(371, 429, 'platform').setScale(0.6).refreshBody();
+        platforms.create(371, 480, 'platform').setScale(0.6).refreshBody();
+        platforms.create(90, 300, 'air platform').setScale(0.3).refreshBody();
+        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
+        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
+        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
+        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
 
-        player = this.physics.add.sprite(100, 200, 'player').setScale(3);
+        player = this.physics.add.sprite(100, 300, 'player').setScale(2);
 
         player.setBounce(0.1);
         player.setCollideWorldBounds(true);
@@ -79,12 +86,14 @@
 
         this.physics.add.collider(player, platforms);
 
-        // cursors = this.input.keyboard.createCursorKeys();
 
     }
 
     function update ()
     {
+        cloudsWhite.tilePositionX += 0.5;
+
+
         cursors = this.input.keyboard.createCursorKeys();
 
         if (cursors.left.isDown){
@@ -110,12 +119,14 @@
         }
 
         if (cursors.up.isDown && player.body.touching.down){
-            player.setVelocityY(-300);
+            player.setVelocityY(-400);
         }
 
         if(!player.body.touching.down && cursors.down.isDown){
             player.setVelocityY(300);
         }
+
+        
 
     }
 
