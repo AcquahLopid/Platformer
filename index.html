@@ -36,7 +36,8 @@
     };
 
     var player;
-    var map;
+    var score = 0;
+    var scoreText;
 
     var game = new Phaser.Game(config);
 
@@ -46,6 +47,8 @@
         this.load.image('clouds', 'assets/clouds.png');
         this.load.image('platform', 'assets/platform.png');
         this.load.image('air platform', 'assets/airplatform.png');
+        this.load.image('money', 'assets/diamond.png');
+        this.load.image('slime', 'assets/slime.png');
         this.load.atlas('player', 'assets/spritesheet.png', 'assets/sprites.json',
             { frameWidth: 100, frameHeight: 100 });
 
@@ -59,13 +62,16 @@
         platforms = this.physics.add.staticGroup();
 
         platforms.create(371, 480, 'platform').setScale(0.6).refreshBody();
-        platforms.create(90, 300, 'air platform').setScale(0.3).refreshBody();
-        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
-        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
-        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
-        platforms.create(400, 250, 'air platform').setScale(0.3).refreshBody();
+        platforms.create(60, 320, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(365, 320, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(668, 320, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(210, 210, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(510, 210, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(60, 100, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(668, 100, 'air platform').setScale(0.2).refreshBody();
+        platforms.create(365, 100, 'air platform').setScale(0.2).refreshBody();
 
-        player = this.physics.add.sprite(100, 300, 'player').setScale(2);
+        player = this.physics.add.sprite(100, 300, 'player').setScale(1.5);
 
         player.setBounce(0.1);
         player.setCollideWorldBounds(true);
@@ -85,6 +91,76 @@
         });
 
         this.physics.add.collider(player, platforms);
+
+        diamonds = this.physics.add.group({
+            key:'money',
+            setScale: { x: .02, y: .02},
+            repeat: 14,
+            setXY: { x:12, y: 0, stepX: 50}
+        });
+
+        diamonds.children.iterate(function (child){
+
+            child.setBounce(Phaser.Math.FloatBetween(0.4, 0.8));
+        });
+
+        this.physics.add.collider(diamonds, platforms);
+
+        this.physics.add.overlap(player, diamonds, collectMoney, null, this);
+
+        function collectMoney (player, money){
+            
+            money.disableBody(true, true);
+
+            score += 10;
+            scoreText.setText('Score: ' + score);
+
+            if (diamonds.countActive(true) === 0){
+
+                diamonds.children.iterate(function (child) {
+
+                    child.enableBody(true, child.x, 0, true, true);
+                });
+
+                var x = (player.x < 400) ? Phaser.Math.Between(400, 600) :
+                Phaser.Math.Between(0, 400);
+
+                var slime = enemies.create(x, 16, 'slime').setScale(0.05);
+                slime.setBounce(1);
+                slime.setCollideWorldBounds(true);
+                slime.setVelocity(Phaser.Math.Between(-100, 100), 30);
+            }
+        }
+
+        scoreText = this.add.text(10, 10, 'score: 0',
+        {fontSize: '32px', fill: '#000'
+        });
+        this.gameOverText = this.add.text(728/2, 100, 'GAME OVER', { fill: '#000'}).setScale(6).setOrigin(.5);
+        this.gameOverText.visible = false;
+                
+
+        enemies = this.physics.add.group();
+
+        this.physics.add.collider(enemies, platforms);
+
+        this.physics.add.collider(player, enemies, hitEnemies, null,  this);
+
+
+        function hitEnemies(player, slime){
+
+            this.physics.pause();
+
+            player.setTint(0xff0000);
+
+            player.anims.play('standing');
+
+            var gameOver = true;
+
+            if (gameOver = true){
+                this.gameOverText.visible = true;
+               location.reload();
+            }
+        }
 
 
     }
@@ -126,6 +202,7 @@
             player.setVelocityY(300);
         }
 
+        
         
 
     }
